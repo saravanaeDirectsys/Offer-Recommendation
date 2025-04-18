@@ -748,7 +748,7 @@ if start_button:
         
         with st.spinner("Loading Sheet16 data..."):
             try:
-                sheet16_df = pd.read_excel(r"C:\Users\User.Think-EDS-37\Desktop\Learning\working code REC\src\Backup\Sheet16.xlsx")
+                sheet16_df = pd.read_excel(r"src/Backup/Sheet16.xlsx")
                 st.session_state.sheet16_df = sheet16_df
             except Exception as e:
                 st.error(f"Error loading Sheet16.xlsx: {e}")
@@ -797,7 +797,7 @@ if start_button:
         basis_text = " and ".join(prediction_basis)
         isp_text = ", ".join(selected_isps)
         sponsor_text = ", ".join(selected_sponsors)
-        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today (April 16, 2025) - Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today - Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
         recommendations = recommendations.rename(columns={'category': 'Category', 'file_type': 'File Type'})
         
         unique_offers = recommendations.groupby('campaign_name').agg({
