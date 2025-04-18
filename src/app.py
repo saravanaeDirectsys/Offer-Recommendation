@@ -797,7 +797,7 @@ if start_button:
         basis_text = " and ".join(prediction_basis)
         isp_text = ", ".join(selected_isps)
         sponsor_text = ", ".join(selected_sponsors)
-        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today {date.today()} - Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today- Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
         recommendations = recommendations.rename(columns={'category': 'Category', 'file_type': 'File Type'})
         
         unique_offers = recommendations.groupby('campaign_name').agg({
