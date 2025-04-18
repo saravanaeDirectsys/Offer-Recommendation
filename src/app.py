@@ -114,6 +114,12 @@ with st.sidebar:
         help="Select one or more sponsors, or 'All Sponsors' for no filter."
     )
     
+    allow_duplicate = st.checkbox(
+        "Allow Duplicate",
+        value=False,
+        help="If checked, allows a data file to be used for up to three offers instead of two."
+    )
+    
     start_button = st.button("🚀 Start Prediction", key="start_button")
 
 # Main Content
@@ -344,7 +350,7 @@ def send_to_api(recommendations_df, api_url="http://127.0.0.1:8000/store-recomme
         save_to_db(recommendations_df)
         return None
 
-def train_and_predict_recommendations(merged_df, sheet16_df, projection_volume, exclude_days, recent_combinations, prediction_basis, selected_isps, selected_sponsors, target_offer_count=None):
+def train_and_predict_recommendations(merged_df, sheet16_df, projection_volume, exclude_days, recent_combinations, prediction_basis, selected_isps, selected_sponsors, allow_duplicate, target_offer_count=None):
     working_df = merged_df.copy()
     working_sheet16 = sheet16_df.copy()
     
@@ -421,11 +427,17 @@ def train_and_predict_recommendations(merged_df, sheet16_df, projection_volume, 
         offer_count = 0
         
         def can_use_datafile(datafile):
-            return datafile_usage.get(datafile, 0) < 2
+            max_usage = 3 if allow_duplicate else 2
+            usage_count = datafile_usage.get(datafile, 0)
+            if usage_count >= max_usage:
+                st.warning(f"Data file {datafile} has reached maximum usage ({max_usage} offers).")
+                return False
+            return True
         
         def update_datafile_usage(datafile):
             datafile_usage[datafile] = datafile_usage.get(datafile, 0) + 1
-            if datafile_usage[datafile] >= 2:
+            max_usage = 3 if allow_duplicate else 2
+            if datafile_usage[datafile] >= max_usage:
                 used_datafiles.add(datafile)
         
         isp_offers_with_priority = isp_offers.copy()
@@ -748,7 +760,7 @@ if start_button:
         
         with st.spinner("Loading Sheet16 data..."):
             try:
-                sheet16_df = pd.read_excel(r"src/Backup/Sheet16.xlsx")
+                sheet16_df = pd.read_excel(r"C:\Users\User.Think-EDS-37\Desktop\Learning\working code REC\src\Backup\Sheet16.xlsx")
                 st.session_state.sheet16_df = sheet16_df
             except Exception as e:
                 st.error(f"Error loading Sheet16.xlsx: {e}")
@@ -783,7 +795,8 @@ if start_button:
                 recent_combinations,
                 prediction_basis,
                 selected_isps,
-                selected_sponsors
+                selected_sponsors,
+                allow_duplicate
             )
         
         if recommendations.empty:
@@ -797,7 +810,7 @@ if start_button:
         basis_text = " and ".join(prediction_basis)
         isp_text = ", ".join(selected_isps)
         sponsor_text = ", ".join(selected_sponsors)
-        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today- Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='subheader'>Recommended Offer-Datafile Pairs for Today (April 16, 2025) - Based on {basis_text} for ISPs: {isp_text} and Sponsors: {sponsor_text}</div>", unsafe_allow_html=True)
         recommendations = recommendations.rename(columns={'category': 'Category', 'file_type': 'File Type'})
         
         unique_offers = recommendations.groupby('campaign_name').agg({
@@ -840,4 +853,4 @@ if start_button:
         st.markdown("**GFGTS** | Built with ❤️ using Streamlit")
 
 if not start_button and not st.session_state.data_loaded:
-    st.info("Configure the parameters in the sidebar and click **Start Prediction** to generate recommendations.")
+    st.info("Configure the parameters in the sidebar and click **Start Prediction** to generate recommendations.")    
